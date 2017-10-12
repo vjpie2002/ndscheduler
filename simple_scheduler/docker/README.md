@@ -14,3 +14,5 @@
 ```
 
 You can now access the localhost:8888 for the web ui.
+
+## How to run shell scripts 
