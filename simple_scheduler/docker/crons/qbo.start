@@ -1,0 +1,63 @@
+#!/bin/sh
+
+
+echo "`date +%Y%m%d.%H%M%S` $0: Started"
+
+host=`hostname | sed -e's/\..*//'`
+
+bindir=`dirname $0`
+hier=`cd $bindir/.. && pwd`
+product=`echo $hier | sed -e's/.*\///'`
+cluster=`echo $product | sed -e's/qboc/c/' -e's/qbo/c1/'`
+
+
+JSERV_LOOP_NOTIFY=mv_wag_tech_ops@intuit.com
+export JSERV_LOOP_NOTIFY
+
+if test -d $hier/tomcat ; then
+   QBNSERVER=tomcat
+fi
+
+JAVA14=1
+export JAVA14
+
+javacmd=
+if [ -h /usr/local/java-$product ]; then
+   javacmd="-java /usr/local/java-$product/bin/java"
+fi
+
+# Watch the startup, and block/unblock the tcp port until it's online
+if [ -x /ops/bin/qbo_guard.pl ]; then 
+   # If in DR mode, do not run qbo_guard.pl
+   if [ ! -f /etc/qbo/qbo.this-is-dr-site.${cluster} ]; then
+      nohup sudo /ops/bin/qbo_guard.pl $product start &
+   fi
+else
+   echo "ERROR: /ops/bin/qbo_guard.pl is missing!"
+fi
+
+if [ -n "$SUDO" ]; then
+   cd /tmp # for AD file perms issues
+   $SUDO "$bindir/tomcat.start -salsa $javacmd"
+else
+   $bindir/tomcat.start -salsa $javacmd
+fi
+
+t=`grep -v '^\s*#' $hier/conf/hosts.conf | awk '$2=="app" { print $1}' | cut -d\. -f1| grep "^$host$"`
+if [ -z "$t" ]; then
+   echo
+   echo
+   echo "ERROR: $hier/conf/hosts.conf missing $host app configuration"
+   echo
+   echo
+   if [ -n "$SUDO" ]; then
+      cd /tmp # for AD permissions issues
+      echo "$hier/conf/hosts.conf missing $host app configuration" | \
+          /bin/mail -s "Bad hosts.conf" mv_wag_production@intuit.com
+   else
+      echo "$hier/conf/hosts.conf missing $host app configuration" | \
+         $SUDO "/bin/mail -s \"Bad hosts.conf\" mv_wag_production@intuit.com"
+   fi
+fi
+
+echo "`date +%Y%m%d.%H%M%S` $0: Finished"
