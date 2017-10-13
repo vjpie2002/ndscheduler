@@ -14,6 +14,7 @@ RUN virtualenv /mnt/scheduler && \
 
 ADD apns.pem /mnt/scheduler/
 ADD check_server_stats.cron /mnt/scheduler/bin/
+ADD qbo.restart /mnt/scheduler/bin/
 ADD run_scheduler /mnt/scheduler/bin/run_scheduler
 RUN chmod 755 /mnt/scheduler/bin/run_scheduler
 
