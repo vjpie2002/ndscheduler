@@ -1,0 +1,26 @@
+#!/bin/sh
+
+STOP_OPTION=none
+
+if [ "x$1" != "x" ]; then
+       STOP_OPTION=$1
+fi
+
+cd `dirname $0`/.. || exit 1
+hier=`pwd`
+
+#
+# Restart qbo client on current server
+#
+
+echo "`date +%Y%m%d.%H%M%S` $0: Started"
+
+if [ "$STOP_OPTION" = "tdump" ]; then
+        $SUDO "$hier/bin/qbo.stop tdump"
+else
+        $SUDO $hier/bin/qbo.stop
+fi
+sleep 1
+$SUDO $hier/bin/qbo.start
+
+echo "`date +%Y%m%d.%H%M%S` $0: Finished"
