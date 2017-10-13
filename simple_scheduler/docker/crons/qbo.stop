@@ -1,0 +1,74 @@
+#!/bin/sh
+
+STOP_OPTION=none
+
+if [ "x$1" != "x" ]; then
+       STOP_OPTION=$1
+fi
+
+PATH=/l/bin:/usr/local/f7/bin:/bin:$PATH
+export PATH
+
+echo "`date +%Y%m%d.%H%M%S` $0: Started"
+
+bindir=`dirname $0`
+hier=`cd $bindir/.. && pwd`
+hiername=`basename $hier`
+product=`echo $hier | sed -e's/.*\///'`
+
+if test -d $hier/tomcat ; then
+   QBNSERVER=tomcat
+fi
+
+javacmd=
+
+if [ -h /usr/local/java-$product ]; then
+   javacmd="-java /usr/local/java-$product/bin/java"
+fi
+server=tomcat
+
+logdir=/l/httpd/logs/$hiername/$server
+server_pidfile=$logdir/$server.pid
+loop_pidfile=$logdir/loop.pid
+count=3
+delay=5
+
+if [ "$STOP_OPTION" != "quick" ]; then
+       if [ -x /ops/bin/qbo_guard.pl ]; then
+         sudo /ops/bin/qbo_guard.pl $product stop
+       else
+         echo "ERROR: /ops/bin/qbo_guard.pl is missing!"
+       fi
+
+           if [ "$STOP_OPTION" = "tdump" ]; then
+                        pid=`cat $server_pidfile`
+                        echo "Taking thread-dumps before stopping the instance. pid : $pid "
+                        while [ $count -gt 0 ]
+                        do
+                                /usr/local/java-$product/bin/jstack -F $pid >> $logdir/jstack.$pid.$(date +%Y%m%d).dmp & dumppid=$!
+                                ( sleep $delay && kill -HUP $dumppid ) 2>/dev/null
+                                let count--
+                        done
+                fi
+fi
+
+if [ -n "$SUDO" ]; then
+   cd /tmp  # done because of permission issues on different dir and because of AD
+   $SUDO "$bindir/$server.stop $javacmd"
+else
+   $bindir/$server.stop $javacmd
+fi
+
+while test -s $loop_pidfile && kill -0 "`cat $loop_pidfile`" 2>/dev/null; do
+   echo "$0 - waiting for $server.loop [`cat $loop_pidfile`] to terminate"
+   proc -h "`cat $loop_pidfile`"
+   sleep 2
+done
+
+while test -s $server_pidfile && kill -0 "`cat $server_pidfile`" 2>/dev/null; do
+   echo "$0 - waiting for $server [`cat $server_pidfile`] to terminate"
+   proc -h "`cat $server_pidfile`"
+   sleep 2
+done
+
+echo "`date +%Y%m%d.%H%M%S` $0: Finished"
