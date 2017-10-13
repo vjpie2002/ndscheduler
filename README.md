@@ -42,7 +42,7 @@ From source code:
 
 Or use docker:
 
-    docker run -it -p 8888:8888 wenbinf/ndscheduler
+    docker run -it -p 8888:8888 vhdubey/intuitscheduler
     
 Open your browser and go to [localhost:8888](http://localhost:8888). 
 
