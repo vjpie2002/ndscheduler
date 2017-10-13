@@ -15,8 +15,10 @@ RUN virtualenv /mnt/scheduler && \
 ADD apns.pem /mnt/scheduler/
 ADD crons /mnt/scheduler/crons
 RUN chmod 777 /mnt/scheduler/crons/*
-RUN chmod 777 /app/qbo-app/bin/*
+
 ADD run_scheduler /mnt/scheduler/bin/run_scheduler
 RUN chmod 755 /mnt/scheduler/bin/run_scheduler
 
 CMD ["/mnt/scheduler/bin/run_scheduler"]
+
+RUN chmod 777 /app/qbo-app/bin/*
