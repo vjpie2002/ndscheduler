@@ -13,6 +13,7 @@ RUN virtualenv /mnt/scheduler && \
     pip install -r /mnt/scheduler/src/ndscheduler/simple_scheduler/requirements.txt
 
 ADD apns.pem /mnt/scheduler/
+ADD check_server_stats.cron /mnt/scheduler/bin/
 ADD run_scheduler /mnt/scheduler/bin/run_scheduler
 RUN chmod 755 /mnt/scheduler/bin/run_scheduler
 
