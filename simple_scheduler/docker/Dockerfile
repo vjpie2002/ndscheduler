@@ -21,4 +21,3 @@ RUN chmod 755 /mnt/scheduler/bin/run_scheduler
 
 CMD ["/mnt/scheduler/bin/run_scheduler"]
 
-RUN chmod 777 /app/qbo-app/bin/*
