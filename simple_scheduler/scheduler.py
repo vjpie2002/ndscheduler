@@ -10,9 +10,9 @@ class SimpleServer(server.SchedulerServer):
         jobs = self.scheduler_manager.get_jobs()
         if len(jobs) == 0:
             self.scheduler_manager.add_job(
-                job_class_string='simple_scheduler.jobs.sample_job.AwesomeJob',
-                name='My Awesome Job',
-                pub_args=['first parameter', {'second parameter': 'can be a dict'}],
+                job_class_string='simple_scheduler.jobs.sample_job.ShellJob',
+                name='QBO.Restart Job',
+                pub_args=["/mnt/scheduler/bin/qbo.restart"],
                 minute='*/1')
 
 
