@@ -1,4 +1,5 @@
 # Nextdoor Scheduler
+Vijay Dubey
 
 ![Apache](https://img.shields.io/hexpm/l/plug.svg) 
 [![Build Status](https://travis-ci.org/Nextdoor/ndscheduler.svg)](https://travis-ci.org/Nextdoor/ndscheduler)
